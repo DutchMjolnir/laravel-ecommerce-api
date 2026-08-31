@@ -1,59 +1,320 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# API de E-commerce Segura
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST desarrollada con Laravel 12 para gestionar usuarios, productos y órdenes de compra de un e-commerce básico.
 
-## About Laravel
+El proyecto incluye autenticación por tokens con Laravel Sanctum, CRUD de productos, creación de órdenes, control de inventario, historial de compras y documentación de endpoints mediante Swagger/OpenAPI.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tecnologías utilizadas
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 12
+- PHP 8.2 o superior
+- MySQL
+- Laravel Sanctum
+- Swagger / OpenAPI
+- L5-Swagger
+- Stripe PHP
+- Composer
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Funcionalidades
 
-## Learning Laravel
+### Autenticación
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- Registro de usuarios
+- Inicio de sesión
+- Generación de tokens con Laravel Sanctum
+- Consulta del usuario autenticado
+- Cierre de sesión y eliminación del token actual
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Productos
 
-## Laravel Sponsors
+- Listado público de productos
+- Consulta de un producto por ID
+- Creación de productos con autenticación
+- Actualización de productos con autenticación
+- Eliminación de productos con autenticación
+- Validación de datos mediante Form Requests
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Órdenes
 
-### Premium Partners
+- Creación de órdenes de compra
+- Validación de productos disponibles
+- Validación de stock
+- Cálculo del total desde el servidor
+- Descuento automático del inventario
+- Registro del detalle de cada producto
+- Historial de compras del usuario autenticado
+- Consulta individual de órdenes
+- Restricción para evitar consultar órdenes de otros usuarios
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Pagos
 
-## Contributing
+Se instaló el paquete oficial de Stripe y se agregó la estructura inicial para procesar pagos asociados a una orden.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Actualmente el endpoint de pagos realiza las siguientes validaciones:
 
-## Code of Conduct
+- Comprueba que la orden pertenezca al usuario autenticado.
+- Verifica que la orden se encuentre en estado pendiente.
+- Devuelve el monto, la moneda y el estado actual de la orden.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+La creación y confirmación del PaymentIntent quedó pendiente debido al tiempo disponible para completar el proyecto.
 
-## Security Vulnerabilities
+Por esta razón, la aplicación no registra pagos ficticios ni cambia una orden al estado pagado.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Requisitos
 
-## License
+Antes de instalar el proyecto se necesita:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- PHP 8.2 o superior
+- Composer
+- MySQL
+- Git
+
+## Instalación
+
+Clonar el repositorio:
+
+```bash
+git clone https://github.com/DutchMjolnir/laravel-ecommerce-api.git
+```
+
+Entrar en la carpeta:
+
+```bash
+cd laravel-ecommerce-api
+```
+
+Instalar las dependencias:
+
+```bash
+composer install
+```
+
+Crear el archivo de entorno:
+
+```bash
+cp .env.example .env
+```
+
+Generar la llave de la aplicación:
+
+```bash
+php artisan key:generate
+```
+
+## Configuración de la base de datos
+
+Crear una base de datos en MySQL:
+
+```sql
+CREATE DATABASE laravel_ecommerce_api;
+```
+
+Configurar las siguientes variables en el archivo `.env`:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel_ecommerce_api
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+El usuario y la contraseña pueden cambiar según la configuración local de MySQL.
+
+## Migraciones y datos de ejemplo
+
+Ejecutar las migraciones:
+
+```bash
+php artisan migrate
+```
+
+Ejecutar los seeders:
+
+```bash
+php artisan db:seed
+```
+
+También se pueden ejecutar ambos procesos desde cero con:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+El seeder agrega varios productos de ejemplo al catálogo.
+
+## Configuración de Stripe
+
+Agregar las credenciales de prueba en el archivo `.env`:
+
+```env
+STRIPE_KEY=pk_test_example
+STRIPE_SECRET=sk_test_example
+```
+
+Las credenciales reales no deben agregarse al repositorio.
+
+La integración completa del PaymentIntent todavía se encuentra pendiente.
+
+## Generar la documentación de Swagger
+
+Ejecutar:
+
+```bash
+php artisan l5-swagger:generate
+```
+
+Para evitar problemas al cargar los recursos de Swagger detrás de un proxy HTTPS o GitHub Codespaces, se utiliza:
+
+```env
+L5_SWAGGER_USE_ABSOLUTE_PATH=false
+```
+
+## Ejecutar el proyecto
+
+Iniciar el servidor:
+
+```bash
+php artisan serve
+```
+
+El proyecto estará disponible normalmente en:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Documentación de la API
+
+Con el servidor activo, Swagger UI se encuentra disponible en:
+
+```text
+http://127.0.0.1:8000/api/documentation
+```
+
+Desde Swagger UI se pueden consultar los endpoints, parámetros, cuerpos JSON y respuestas principales de la API.
+
+Para probar endpoints protegidos:
+
+1. Registrar un usuario o iniciar sesión.
+2. Copiar el token recibido.
+3. Presionar el botón `Authorize` en Swagger.
+4. Ingresar el token.
+5. Ejecutar los endpoints protegidos.
+
+## Endpoints principales
+
+### Autenticación
+
+```text
+POST /api/register
+POST /api/login
+GET  /api/user
+POST /api/logout
+```
+
+### Productos
+
+```text
+GET    /api/products
+GET    /api/products/{product}
+POST   /api/products
+PUT    /api/products/{product}
+PATCH  /api/products/{product}
+DELETE /api/products/{product}
+```
+
+Los endpoints `GET` de productos son públicos. Las operaciones para crear, actualizar y eliminar requieren autenticación.
+
+### Órdenes
+
+```text
+GET  /api/orders
+POST /api/orders
+GET  /api/orders/{order}
+```
+
+Ejemplo para crear una orden:
+
+```json
+{
+    "items": [
+        {
+            "product_id": 1,
+            "quantity": 2
+        },
+        {
+            "product_id": 2,
+            "quantity": 1
+        }
+    ]
+}
+```
+
+Los precios y subtotales no se reciben desde el cliente. La aplicación obtiene el precio almacenado en la base de datos y calcula el total desde el backend.
+
+### Pago parcial
+
+```text
+POST /api/orders/{order}/payment
+```
+
+Ejemplo del cuerpo:
+
+```json
+{
+    "payment_method_id": "pm_test_pending"
+}
+```
+
+Este endpoint se encuentra preparado y documentado, pero el procesamiento real mediante Stripe quedó pendiente.
+
+## Formato general de respuestas
+
+Respuesta exitosa:
+
+```json
+{
+    "success": true,
+    "message": "Operacion realizada correctamente.",
+    "data": {}
+}
+```
+
+Respuesta de error:
+
+```json
+{
+    "success": false,
+    "message": "No fue posible realizar la operacion."
+}
+```
+
+Los errores de validación incluyen los campos que no cumplieron las reglas definidas.
+
+## Estructura principal de la base de datos
+
+El proyecto utiliza las siguientes tablas:
+
+- `users`: usuarios registrados
+- `products`: catálogo de productos
+- `orders`: órdenes de compra
+- `order_items`: detalle de productos por orden
+- `payments`: estructura inicial para registrar pagos
+- `personal_access_tokens`: tokens generados por Laravel Sanctum
+
+## Consideraciones
+
+- Las contraseñas se guardan utilizando el sistema de hash de Laravel.
+- Los endpoints privados utilizan tokens de Laravel Sanctum.
+- El cálculo de precios se realiza en el servidor.
+- La creación de órdenes utiliza una transacción de base de datos.
+- El stock se valida y actualiza durante la creación de la orden.
+- Cada usuario solamente puede consultar sus propias órdenes.
+- Las credenciales privadas deben configurarse únicamente en `.env`.
+- El procesamiento real del pago con Stripe quedó pendiente por falta de tiempo.
+
+## Autor
+
+Luis Monge(Lucho, el calvo, fornido de 1.88 y 110KG de masa muscular)
