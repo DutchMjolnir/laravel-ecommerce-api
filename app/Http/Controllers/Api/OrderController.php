@@ -9,10 +9,30 @@ use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Attributes as OA;
 use Throwable;
 
 class OrderController extends Controller
 {
+    #[OA\Get(
+        path: '/orders',
+        summary: 'Consultar el historial de compras',
+        description: 'Devuelve las ordenes creadas por el usuario autenticado.',
+        tags: ['Ordenes'],
+        security: [
+            ['sanctum' => []],
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Historial de compras obtenido correctamente'
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Usuario no autenticado'
+            ),
+        ]
+    )]
     public function index(Request $request): JsonResponse
     {
         $orders = Order::with([
@@ -30,6 +50,45 @@ class OrderController extends Controller
         ]);
     }
 
+    #[OA\Get(
+        path: '/orders/{order}',
+        summary: 'Consultar una orden por ID',
+        description: 'Devuelve una orden solamente si pertenece al usuario autenticado.',
+        tags: ['Ordenes'],
+        security: [
+            ['sanctum' => []],
+        ],
+        parameters: [
+            new OA\Parameter(
+                name: 'order',
+                description: 'ID de la orden',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(
+                    type: 'integer',
+                    example: 1
+                )
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Orden obtenida correctamente'
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Usuario no autenticado'
+            ),
+            new OA\Response(
+                response: 403,
+                description: 'La orden pertenece a otro usuario'
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Orden no encontrada'
+            ),
+        ]
+    )]
     public function show(Request $request, Order $order): JsonResponse
     {
         if ($order->user_id !== $request->user()->id) {
@@ -51,6 +110,46 @@ class OrderController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/orders',
+        summary: 'Crear una orden de compra',
+        description: 'Crea una orden, calcula el total y descuenta el stock de los productos.',
+        tags: ['Ordenes'],
+        security: [
+            ['sanctum' => []],
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: [
+                    'items',
+                ],
+                properties: [
+                    new OA\Property(
+                        property: 'items',
+                        type: 'array',
+                        items: new OA\Items(
+                            ref: '#/components/schemas/OrderItemInput'
+                        )
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Orden creada correctamente'
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Usuario no autenticado'
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Datos invalidos, producto no disponible o stock insuficiente'
+            ),
+        ]
+    )]
     public function store(StoreOrderRequest $request): JsonResponse
     {
         $items = $request->validated()['items'];

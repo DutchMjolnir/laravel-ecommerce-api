@@ -1,0 +1,679 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API de E-commerce Segura",
+        "description": "API REST desarrollada con Laravel 12 para gestionar usuarios, productos, ordenes y pagos.",
+        "contact": {
+            "name": "Luis Monge"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "Servidor principal de la API"
+        }
+    ],
+    "paths": {
+        "/register": {
+            "post": {
+                "tags": [
+                    "Autenticacion"
+                ],
+                "summary": "Registrar un nuevo usuario",
+                "operationId": "5d4fa5d5607ed675ba93907e1fc94534",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Luis Monge"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "luis@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario registrado correctamente"
+                    },
+                    "422": {
+                        "description": "Error de validacion"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Autenticacion"
+                ],
+                "summary": "Iniciar sesion",
+                "operationId": "67d6d0fdd54fba132e1b6f55ca254183",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "luis@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inicio de sesion exitoso"
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas"
+                    },
+                    "422": {
+                        "description": "Error de validacion"
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "tags": [
+                    "Autenticacion"
+                ],
+                "summary": "Consultar el usuario autenticado",
+                "operationId": "2baab1eeb5fd49516237a38da22e7a07",
+                "responses": {
+                    "200": {
+                        "description": "Usuario autenticado"
+                    },
+                    "401": {
+                        "description": "Token no valido o no enviado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Autenticacion"
+                ],
+                "summary": "Cerrar sesion",
+                "operationId": "28d48c13fca984400ac8de99f54ee13a",
+                "responses": {
+                    "200": {
+                        "description": "Sesion cerrada correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/orders": {
+            "get": {
+                "tags": [
+                    "Ordenes"
+                ],
+                "summary": "Consultar el historial de compras",
+                "description": "Devuelve las ordenes creadas por el usuario autenticado.",
+                "operationId": "8f3183bfa0ecb8a2c864cbf972b8061d",
+                "responses": {
+                    "200": {
+                        "description": "Historial de compras obtenido correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Ordenes"
+                ],
+                "summary": "Crear una orden de compra",
+                "description": "Crea una orden, calcula el total y descuenta el stock de los productos.",
+                "operationId": "b6490f9d9026dbe871b41207e118fffb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/OrderItemInput"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Orden creada correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    },
+                    "422": {
+                        "description": "Datos invalidos, producto no disponible o stock insuficiente"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/orders/{order}": {
+            "get": {
+                "tags": [
+                    "Ordenes"
+                ],
+                "summary": "Consultar una orden por ID",
+                "description": "Devuelve una orden solamente si pertenece al usuario autenticado.",
+                "operationId": "3a2d78e76e9fc3f06bb879fb7d48b40d",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "ID de la orden",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Orden obtenida correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    },
+                    "403": {
+                        "description": "La orden pertenece a otro usuario"
+                    },
+                    "404": {
+                        "description": "Orden no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/orders/{order}/payment": {
+            "post": {
+                "tags": [
+                    "Pagos"
+                ],
+                "summary": "Procesar el pago de una orden",
+                "description": "La estructura inicial de Stripe fue agregada, pero el procesamiento completo del pago quedo pendiente.",
+                "operationId": "bf61c2a60767a7da29060d4eca499100",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "ID de la orden que se desea pagar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "payment_method_id": {
+                                        "type": "string",
+                                        "example": "pm_test_pending",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "501": {
+                        "description": "La integracion completa con Stripe quedo pendiente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    },
+                    "403": {
+                        "description": "La orden pertenece a otro usuario"
+                    },
+                    "404": {
+                        "description": "Orden no encontrada"
+                    },
+                    "422": {
+                        "description": "La orden ya fue procesada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/products": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Listar productos disponibles",
+                "operationId": "080f057905dc32d2f11065d606dc4cd6",
+                "responses": {
+                    "200": {
+                        "description": "Productos obtenidos correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Productos obtenidos correctamente."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Product"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Crear un producto",
+                "operationId": "eddf8c7847239ddc1040daadd814e21b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price",
+                                    "stock"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Soporte para laptop"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Soporte ajustable para escritorio.",
+                                        "nullable": true
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Producto creado correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    },
+                    "422": {
+                        "description": "Error de validacion"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/products/{product}": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Consultar un producto por ID",
+                "operationId": "c5ec5b4fb4c3790c73e9849244665f45",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "ID del producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Producto obtenido correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Producto obtenido correctamente."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Product"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Actualizar un producto",
+                "operationId": "f7375aee24e5fccaf1567852e3492363",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "ID del producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Teclado mecanico actualizado"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Descripcion actualizada del producto.",
+                                        "nullable": true
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 70.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 20
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Producto actualizado correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    },
+                    "422": {
+                        "description": "Error de validacion"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Eliminar un producto",
+                "operationId": "fb827fecd27dd65fa2b514023be16841",
+                "parameters": [
+                    {
+                        "name": "product",
+                        "in": "path",
+                        "description": "ID del producto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Producto eliminado correctamente"
+                    },
+                    "401": {
+                        "description": "Usuario no autenticado"
+                    },
+                    "404": {
+                        "description": "Producto no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Product": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Teclado mecanico"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Teclado mecanico con iluminacion RGB.",
+                        "nullable": true
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 65.99
+                    },
+                    "stock": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "OrderItemInput": {
+                "required": [
+                    "product_id",
+                    "quantity"
+                ],
+                "properties": {
+                    "product_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "ApiError": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Ocurrio un error al procesar la solicitud."
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Token generado mediante Laravel Sanctum",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autenticacion",
+            "description": "Autenticacion"
+        },
+        {
+            "name": "Ordenes",
+            "description": "Ordenes"
+        },
+        {
+            "name": "Pagos",
+            "description": "Pagos"
+        },
+        {
+            "name": "Productos",
+            "description": "Productos"
+        }
+    ]
+}
